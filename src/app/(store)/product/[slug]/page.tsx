@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { api } from '@/data/api';
 import { IProduct } from '@/data/types/products';
 import { Metadata } from 'next';
+import { AddToCartButton } from '@/components/add-to-cart-button';
 
 interface IProductPageProps {
 	params: {
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: IProductPageProps): Promise<M
 }
 
 export async function generateStaticParams() {
-	const response = await api('products/featured');
+	const response = await api('/products/featured');
 	const products: IProduct[] = await response.json();
 
 	return products.map((product) => {
@@ -105,12 +106,7 @@ export default async function ProductPage({ params }: IProductPageProps) {
 					</div>
 				</div>
 
-				<button
-					type='button'
-					className='mt-8 flex h-12 items-center justify-center rounded-full bg-emerald-600 font-semibold text-white'
-				>
-					Adicionar ao carrinho
-				</button>
+				<AddToCartButton productId={product.id} />
 			</div>
 		</div>
 	);
