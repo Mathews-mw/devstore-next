@@ -1,15 +1,36 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { api } from '@/data/api';
+import { IProduct } from '@/data/types/products';
+import { Metadata } from 'next';
 
-export default function Home() {
+async function getFeaturedProducts(): Promise<IProduct[]> {
+	const response = await api('/products/featured', {
+		next: {
+			revalidate: 60 * 60, // 1 hora
+		},
+	});
+
+	const products = await response.json();
+
+	return products;
+}
+
+export const metadata: Metadata = {
+	title: 'Home',
+};
+
+export default async function Home() {
+	const [highlightProduct, ...others] = await getFeaturedProducts();
+
 	return (
 		<div className='grid max-h-[800px] grid-cols-9 grid-rows-6 gap-6'>
 			<Link
-				href='/'
+				href={`/product/${highlightProduct.slug}`}
 				className='group relative col-span-6 row-span-6 rounded-lg bg-zinc-900 overflow-hidden flex justify-center items-center'
 			>
 				<Image
-					src='/moletom-never-stop-learning.png'
+					src={highlightProduct.image}
 					className='group-hover:scale-105 transition-transform duration-500'
 					width={800}
 					height={800}
@@ -18,54 +39,48 @@ export default function Home() {
 				/>
 
 				<div className='absolute bottom-28 right-28 h-12 flex items-center gap-2 max-w-[280px] rounded-full border-2 border-zinc-500 bg-black/60 p-1 pl-5'>
-					<span className='text-sm truncate'>Moletom Never Stop Learning</span>
+					<span className='text-sm truncate'>{highlightProduct.title}</span>
 					<span className='flex h-full items-center justify-center rounded-full bg-violet-500 px-4 font-semibold'>
-						R$129
+						{highlightProduct.price.toLocaleString('pt-BR', {
+							style: 'currency',
+							currency: 'BRL',
+							minimumFractionDigits: 0, // Não mostra os centavos
+							maximumFractionDigits: 0,
+						})}
 					</span>
 				</div>
 			</Link>
 
-			<Link
-				href='/'
-				className='group relative col-span-3 row-span-3 rounded-lg bg-zinc-900 overflow-hidden flex justify-center items-start'
-			>
-				<Image
-					src='/moletom-java.png'
-					className='group-hover:scale-105 transition-transform duration-500'
-					width={800}
-					height={800}
-					quality={100}
-					alt=''
-				/>
+			{others.map((product) => {
+				return (
+					<Link
+						key={product.id}
+						href={`/product/${product.slug}`}
+						className='group relative col-span-3 row-span-3 rounded-lg bg-zinc-900 overflow-hidden flex justify-center items-start'
+					>
+						<Image
+							src={product.image}
+							className='group-hover:scale-105 transition-transform duration-500'
+							width={800}
+							height={800}
+							quality={100}
+							alt=''
+						/>
 
-				<div className='absolute bottom-10 right-10 h-12 flex items-center gap-2 max-w-[280px] rounded-full border-2 border-zinc-500 bg-black/60 p-1 pl-5'>
-					<span className='text-sm truncate'>Moletom Java</span>
-					<span className='flex h-full items-center justify-center rounded-full bg-violet-500 px-4 font-semibold'>
-						R$129
-					</span>
-				</div>
-			</Link>
-
-			<Link
-				href='/'
-				className='group relative col-span-3 row-span-3 rounded-lg bg-zinc-900 overflow-hidden flex justify-center items-start'
-			>
-				<Image
-					src='/moletom-ai-side.png'
-					className='group-hover:scale-105 transition-transform duration-500'
-					width={800}
-					height={800}
-					quality={100}
-					alt=''
-				/>
-
-				<div className='absolute bottom-10 right-10 h-10 flex items-center gap-2 max-w-[280px] rounded-full border-2 border-zinc-500 bg-black/60 p-1 pl-5'>
-					<span className='text-sm truncate'>Moletom Ai Side</span>
-					<span className='flex h-full items-center justify-center rounded-full bg-violet-500 px-4 font-semibold'>
-						R$129
-					</span>
-				</div>
-			</Link>
+						<div className='absolute bottom-10 right-10 h-12 flex items-center gap-2 max-w-[280px] rounded-full border-2 border-zinc-500 bg-black/60 p-1 pl-5'>
+							<span className='text-sm truncate'>{product.title}</span>
+							<span className='flex h-full items-center justify-center rounded-full bg-violet-500 px-4 font-semibold'>
+								{product.price.toLocaleString('pt-BR', {
+									style: 'currency',
+									currency: 'BRL',
+									minimumFractionDigits: 0, // Não mostra os centavos
+									maximumFractionDigits: 0,
+								})}
+							</span>
+						</div>
+					</Link>
+				);
+			})}
 		</div>
 	);
 }
