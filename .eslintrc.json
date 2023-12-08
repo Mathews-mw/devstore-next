@@ -20,6 +20,7 @@
     "no-unused-vars": 0,
     "dot-notation": "off",
     "endOfLine": 0,
-    "@typescript-eslint/no-unused-vars": "warn"
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-namespace": "off"
   }
 }

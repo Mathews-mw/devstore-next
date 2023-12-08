@@ -1,8 +1,6 @@
 describe('Search products', () => {
 	it('Shoud be able to search for products', () => {
-		cy.visit('/');
-
-		cy.get('input[name=q]').type('moletom').parent('form').submit();
+		cy.searchQuery('moletom');
 
 		cy.location('pathname').should('include', '/search');
 		cy.location('search').should('include', 'q=moletom');
